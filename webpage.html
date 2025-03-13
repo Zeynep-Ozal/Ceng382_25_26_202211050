@@ -133,28 +133,68 @@
             position: relative;
             transform: translateX(-40px);
         }
+
+        #clock{
+            font-size: 3rem;
+            font-weight: bold;
+            color: rgb(28, 56, 158);
+        }
+
+        @keyframes slideInFromLeft {
+            0% {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
 
     <h1>Genshin Impact</h1>
+    <div id="clock"></div>
 
     <video autoplay muted playsinline onended="this.style.display='none'" id="bg-video">
         <source src="1.mp4" type="video/mp4">
     </video>
     
-
     <label class="box">
         <h2>Login</h2>
-        <form action="#" method="POST">
-            <input type="text" name="username" placeholder="user name or e-mail" required>
-            <input type="password" name="password" placeholder="password" required>
-            <input type="submit" value="Enter">
+        <form action="#" method="POST" onsubmit="event.preventDefault();">
+            <input id="usernamebox" type="text" name="username" placeholder="user name or e-mail" required>
+            <input id="passwordbox" type="password" name="password" placeholder="password" required>
+            <input id="submitbox" type="submit" value="Enter">
             <div class="four-point-star"></div>
 
         </form>
     </label>
-    <label class="custom-shape"></label>    
+   
+    <label class="custom-shape"></label>  
+    
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+     
+            document.getElementById('clock').textContent = `${hours}:${minutes}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        document.addEventListener("keydown", function(event) {
+        if (event.key.toLowerCase() === "h") {
+            const forms = document.querySelectorAll("form, input, button,.box,.four-point-star");
+            forms.forEach(form => {
+                form.style.display = form.style.display === "none" ? "block" : "none";
+            });
+        }
+    });
+    </script>
+    <script src="func.js"></script>
 
 </body>
 </html>

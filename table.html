@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        body {
+            background-color: #2c2f33;
+            font-family: Arial, sans-serif;
+            color: #f1f1f1;
+        }
+
+        @keyframes dropIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .box {
+            width: 400px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 50px auto;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+            animation: dropIn 0.8s ease-out;
+        }
+
+        label {
+            width: 100%;
+            margin-bottom: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #666;
+            font-size: 16px;
+            margin-bottom: 10px;
+            transition: 0.3s ease;
+            background: #2c2f33;
+            color: white;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: #b0b0b0;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #4c75af;
+            box-shadow: 0 0 5px #4c75af;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #4c75af;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #3a5d90;
+        }
+
+        h3 {
+            text-align: center;
+            color: white;
+        }
+
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            border: 1px solid #444;
+            padding: 12px;
+            text-align: center;
+            color: #f1f1f1;
+        }
+
+        th {
+            background-color: #4c75af;
+            color: white;
+        }
+
+        tr {
+            transition: transform 0.3s ease;
+        }
+
+        tr:hover {
+            background-color: rgba(76, 117, 175, 0.2);
+        }
+
+        tr.duplicate {
+            animation: dropIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="box">
+        <form id="classForm">
+            <label for="className">Class Name:</label>
+            <input type="text" id="className"><br>
+            
+            <label for="numPeople">Number of People:</label>
+            <input type="number" id="numPeople"><br>
+            
+            <label for="description">Description:</label>
+            <textarea id="description"></textarea><br>
+            
+            <button type="submit">Add Class</button>
+        </form>
+    </div>
+    
+    <h3>Class Table</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Class Name</th>
+                <th>Number of People</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody id="classTableBody">
+        </tbody>
+    </table>
+
+    <script>
+        document.getElementById("classForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            let className = document.getElementById("className").value;
+            let numPeople = document.getElementById("numPeople").value;
+            let description = document.getElementById("description").value;
+            
+            let tableBody = document.getElementById("classTableBody");
+            let newRow = tableBody.insertRow();
+            
+            newRow.insertCell(0).textContent = className;
+            newRow.insertCell(1).textContent = numPeople;
+            newRow.insertCell(2).textContent = description;
+
+            newRow.addEventListener("mouseover", function() {
+                newRow.style.transform = "scale(1.05)";
+            });
+            
+            newRow.addEventListener("mouseout", function() {
+                newRow.style.transform = "scale(1)";
+            });
+
+            newRow.addEventListener("dblclick", function() {
+                let clonedRow = newRow.cloneNode(true);
+                clonedRow.classList.add("duplicate");
+                tableBody.appendChild(clonedRow);
+                addRowEventListeners(clonedRow);
+            });
+
+            addRowEventListeners(newRow);
+            document.getElementById("classForm").reset();
+        });
+
+        function addRowEventListeners(row) {
+            row.addEventListener("mouseover", function() {
+                row.style.transform = "scale(1.05)";
+            });
+
+            row.addEventListener("mouseout", function() {
+                row.style.transform = "scale(1)";
+            });
+
+            row.addEventListener("dblclick", function() {
+                let clonedRow = row.cloneNode(true);
+                clonedRow.classList.add("duplicate");
+                document.getElementById("classTableBody").appendChild(clonedRow);
+                addRowEventListeners(clonedRow);
+            });
+        }
+    </script>
+</body>
+</html>
