@@ -1,0 +1,62 @@
+﻿@page
+@model RazorPage.Pages.IndexModel
+@{
+    ViewData["Title"] = "Class List";
+}
+
+<div class="row">
+    <!-- Sol tarafta form -->
+    <div class="col-md-6">
+        <h2>Add New Class</h2>
+        <form method="post">
+            <div class="form-group">
+                <label for="ClassName">Class Name</label>
+                <input type="text" class="form-control" id="ClassName" name="ClassName" value="@Model.NewClass.ClassName" required />
+            </div>
+            <div class="form-group">
+                <label for="StudentCount">Student Count</label>
+                <input type="number" class="form-control" id="StudentCount" name="StudentCount" value="@Model.NewClass.StudentCount" required />
+            </div>
+            <div class="form-group">
+                <label for="Description">Description</label>
+                <input type="text" class="form-control" id="Description" name="Description" value="@Model.NewClass.Description" />
+            </div>
+            <button type="submit" class="btn btn-primary">Add Class</button>
+        </form>
+    </div>
+
+    <!-- Sağ tarafta tablo -->
+    <div class="col-md-6">
+        <h2>Class List</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Class Name</th>
+                    <th>Student Count</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.ClassList)
+                {
+                    <tr>
+                        <td>@item.Id</td>
+                        <td>@item.ClassName</td>
+                        <td>@item.StudentCount</td>
+                        <td>@item.Description</td>
+                        <td>
+                            <form method="post" asp-page-handler="Delete" asp-route-id="@item.Id" style="display:inline;">
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                            
+                        <a asp-page-handler="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
