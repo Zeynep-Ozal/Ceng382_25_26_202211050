@@ -1,73 +1,71 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using RazorPage.Models;
-using System.Collections.Generic;
-using System.Linq;  // To use LINQ methods
 
 namespace RazorPage.Pages
 {
-    public class IndexModel : PageModel
+   public class IndexModel : PageModel
     {
-        // Static list to simulate a database
-        private static List<ClassInformationModel> _classList = new List<ClassInformationModel>();
+        public static List<ClassInformationModel> ClassesData = new();
 
         [BindProperty]
-        public ClassInformationModel NewClass { get; set; }
+        public required ClassInformationModel NewClass { get; set; }
 
-        public List<ClassInformationModel> ClassList => _classList; 
+        public List<ClassInformationModel> Classes => ClassesData;
+
+        [BindProperty]
+        public int EditIndex { get; set; }
+
+        [BindProperty]
+        public int DeleteIndex { get; set; }
+
+        public bool IsEditMode => TempData["EditIndex"] != null;
 
         public void OnGet()
         {
-            // Ensure NewClass is initialized when the page loads
-            NewClass = NewClass ?? new ClassInformationModel();
+            if (TempData["EditIndex"] != null)
+            {
+                int idx = (int)TempData["EditIndex"];
+                EditIndex = idx; 
+                NewClass = new ClassInformationModel
+                {
+                    ClassName = ClassesData[idx].ClassName,
+                    Description = ClassesData[idx].Description,
+                    StudentCount = ClassesData[idx].StudentCount
+                };
+            }
         }
 
-        // Add new class
-        public IActionResult OnPostAdd()
+        public IActionResult OnPost()
         {
-            if (!ModelState.IsValid)
+            if (EditIndex >= 0 && EditIndex < ClassesData.Count)
             {
-                return Page();
+                ClassesData[EditIndex].ClassName = NewClass.ClassName;
+                ClassesData[EditIndex].Description = NewClass.Description;
+                ClassesData[EditIndex].StudentCount = NewClass.StudentCount;
+            }
+            else
+            {
+                NewClass.Id = ClassesData.Count + 1;
+                ClassesData.Add(NewClass);
             }
 
-            if (NewClass.Id == 0)
-            {
-                NewClass.Id = _classList.Count > 0 ? _classList.Max(c => c.Id) + 1 : 1;
-            }
-            _classList.Add(NewClass);
-            return RedirectToPage(); 
+            TempData.Remove("EditIndex"); 
+            return RedirectToPage();
         }
 
-        public IActionResult OnPostDelete(int id)
+        public IActionResult OnPostDelete()
         {
-            var classToRemove = _classList.FirstOrDefault(c => c.Id == id);
-            if (classToRemove != null)
+            if (DeleteIndex >= 0 && DeleteIndex < ClassesData.Count)
             {
-                _classList.Remove(classToRemove);
+                ClassesData.RemoveAt(DeleteIndex);
             }
-            return RedirectToPage(); 
+            return RedirectToPage();
         }
 
-        public IActionResult OnGetEdit(int id)
-        {
-            var classToEdit = _classList.FirstOrDefault(c => c.Id == id);
-            if (classToEdit != null)
-            {
-                NewClass = classToEdit; // Populate NewClass for editing
-            }
-            return Page();  
-        }
-
-        // Save the edited class
         public IActionResult OnPostEdit()
         {
-            var classToEdit = _classList.FirstOrDefault(c => c.Id == NewClass.Id);
-            if (classToEdit != null)
-            {
-                classToEdit.ClassName = NewClass.ClassName;
-                classToEdit.StudentCount = NewClass.StudentCount;
-                classToEdit.Description = NewClass.Description;
-            }
+            TempData["EditIndex"] = EditIndex;
             return RedirectToPage();
         }
     }

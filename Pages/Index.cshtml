@@ -1,62 +1,150 @@
 ﻿@page
 @model RazorPage.Pages.IndexModel
 @{
-    ViewData["Title"] = "Class List";
+    ViewData["Title"] = "Class Manager";
 }
 
-<div class="row">
-    <!-- Sol tarafta form -->
-    <div class="col-md-6">
-        <h2>Add New Class</h2>
+<style>
+    <!-- koyu tema yap ve  şekillerin kenarları oval olsun-->
+    body {
+        background-color: #1e1e2f;
+        color: #ffffff;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    h2 {
+        color: #e0e0ff;
+    }
+
+    input, button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        margin-bottom: 15px;
+        border-radius: 6px;
+        border: none;
+        box-sizing: border-box;
+        font-size: 14px;
+    }
+
+    input[type="text"], input[type="number"] {
+        background-color: #2e2e3e;
+        color: white;
+    }
+
+    button {
+        background-color: #6c63ff;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #5a54e8;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #2e2e3e;
+        color: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    th, td {
+        padding: 12px 15px;
+        text-align: center;
+        border-bottom: 1px solid #444;
+    }
+
+   th {
+        background-color: #3f3f5a;
+        padding: 8px 10px;
+        font-size: 13px;
+        line-height: 1.2;
+        font-weight: 400;
+        border-bottom: 1px solid #555;
+    }
+
+    td form {
+        display: inline-block;
+        margin: 0 2px;
+    }
+
+    .container {
+        display: flex;
+        justify-content: flex-start;
+        align-items: flex-start;
+        padding: 30px;
+        gap: 40px;
+    }
+
+    .form-card, .table-card {
+        padding: 20px;
+        border-radius: 12px;
+        background-color: #29293d;
+        box-shadow: 0 0 15px rgba(0,0,0,0.6);
+    }
+
+    .form-card {
+        width: 30%;
+    }
+
+    .table-card {
+        flex: 1;
+        max-width: 70%;
+    }
+</style>
+
+<div class="container">
+    <!-- sol tarafa form koy -->
+    <div class="form-card">
+        <h2>Class Information</h2>
         <form method="post">
-            <div class="form-group">
-                <label for="ClassName">Class Name</label>
-                <input type="text" class="form-control" id="ClassName" name="ClassName" value="@Model.NewClass.ClassName" required />
-            </div>
-            <div class="form-group">
-                <label for="StudentCount">Student Count</label>
-                <input type="number" class="form-control" id="StudentCount" name="StudentCount" value="@Model.NewClass.StudentCount" required />
-            </div>
-            <div class="form-group">
-                <label for="Description">Description</label>
-                <input type="text" class="form-control" id="Description" name="Description" value="@Model.NewClass.Description" />
-            </div>
-            <button type="submit" class="btn btn-primary">Add Class</button>
+            <input type="hidden" asp-for="EditIndex" />
+            <label>Class Name</label>
+            <input type="text" asp-for="NewClass.ClassName" required />
+
+            <label>Description</label>
+            <input type="text" asp-for="NewClass.Description" required />
+
+            <label>Student Count</label>
+            <input type="number" asp-for="NewClass.StudentCount" required />
+
+            <button type="submit">@(Model.IsEditMode ? "Update" : "Add") Class</button>
         </form>
     </div>
 
-    <!-- Sağ tarafta tablo -->
-    <div class="col-md-6">
-        <h2>Class List</h2>
-        <table class="table table-bordered">
-            <thead>
+    <!-- Tsağ tarafa tablo koy class name description student count ve actions olsun -->
+    <div class="table-card">
+        <h2 style="text-align: center;">Class List</h2>
+        <table>
+            <tr>
+                <th>Class Name</th>
+                <th>Description</th>
+                <th>Student Count</th>
+                <th>Actions</th>
+            </tr>
+            @foreach (var c in Model.Classes)
+            {
                 <tr>
-                    <th>Id</th>
-                    <th>Class Name</th>
-                    <th>Student Count</th>
-                    <th>Description</th>
-                    <th>Actions</th>
+                    <td>@c.ClassName</td>
+                    <td>@c.Description</td>
+                    <td>@c.StudentCount</td>
+                    <td>
+                        <form method="post" asp-page-handler="Edit">
+                            <input type="hidden" name="EditIndex" value="@Model.Classes.IndexOf(c)" />
+                            <button type="submit">Edit</button>
+                        </form>
+                        <form method="post" asp-page-handler="Delete">
+                            <input type="hidden" name="DeleteIndex" value="@Model.Classes.IndexOf(c)" />
+                            <button type="submit">Delete</button>
+                        </form>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model.ClassList)
-                {
-                    <tr>
-                        <td>@item.Id</td>
-                        <td>@item.ClassName</td>
-                        <td>@item.StudentCount</td>
-                        <td>@item.Description</td>
-                        <td>
-                            <form method="post" asp-page-handler="Delete" asp-route-id="@item.Id" style="display:inline;">
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
-                            
-                        <a asp-page-handler="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
-                        </td>
-
-                    </tr>
-                }
-            </tbody>
+            }
         </table>
     </div>
 </div>

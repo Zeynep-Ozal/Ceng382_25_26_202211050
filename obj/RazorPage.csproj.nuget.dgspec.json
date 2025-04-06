@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Zeynep\\RazorPage\\RazorPage.csproj": {}
+    "C:\\Users\\Zeynep\\Desktop\\weblab\\RazorPage.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Zeynep\\RazorPage\\RazorPage.csproj": {
+    "C:\\Users\\Zeynep\\Desktop\\weblab\\RazorPage.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Zeynep\\RazorPage\\RazorPage.csproj",
+        "projectUniqueName": "C:\\Users\\Zeynep\\Desktop\\weblab\\RazorPage.csproj",
         "projectName": "RazorPage",
-        "projectPath": "C:\\Users\\Zeynep\\RazorPage\\RazorPage.csproj",
+        "projectPath": "C:\\Users\\Zeynep\\Desktop\\weblab\\RazorPage.csproj",
         "packagesPath": "C:\\Users\\Zeynep\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Zeynep\\RazorPage\\obj\\",
+        "outputPath": "C:\\Users\\Zeynep\\Desktop\\weblab\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Zeynep\\AppData\\Roaming\\NuGet\\NuGet.Config"
