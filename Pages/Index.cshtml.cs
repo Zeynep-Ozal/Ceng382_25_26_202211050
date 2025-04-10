@@ -1,72 +1,119 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using RazorPage.Models;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace RazorPage.Pages
 {
-   public class IndexModel : PageModel
+    public class IndexModel : PageModel
     {
-        public static List<ClassInformationModel> ClassesData = new();
+        private static List<ClassInformationModel> AllClasses = GenerateSampleData();
 
         [BindProperty]
-        public required ClassInformationModel NewClass { get; set; }
+        public ClassInformationModel NewClass { get; set; } = new();
 
-        public List<ClassInformationModel> Classes => ClassesData;
+        [BindProperty(SupportsGet = true)]
+        public string? Filter { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public int PageNumber { get; set; } = 1;
+
+        public int PageSize { get; set; } = 10;
+        public int TotalPages { get; set; }
 
         [BindProperty]
         public int EditIndex { get; set; }
 
-        [BindProperty]
-        public int DeleteIndex { get; set; }
+        public List<ClassInformationTable> FilteredClasses { get; set; } = new();
 
         public bool IsEditMode => TempData["EditIndex"] != null;
 
         public void OnGet()
         {
+            var query = AllClasses.AsQueryable();
+
+            if (!string.IsNullOrEmpty(Filter))
+            {
+                query = query.Where(c => c.ClassName != null && c.ClassName.Contains(Filter, System.StringComparison.OrdinalIgnoreCase));
+            }
+
+            TotalPages = (int)System.Math.Ceiling(query.Count() / (double)PageSize);
+
+            FilteredClasses = query
+                .Skip((PageNumber - 1) * PageSize)
+                .Take(PageSize)
+                .Select(c => new ClassInformationTable
+                {
+                    Id = c.Id,
+                    ClassName = c.ClassName,
+                    StudentCount = c.StudentCount,
+                    Description = c.Description
+                }).ToList();
+
             if (TempData["EditIndex"] != null)
             {
                 int idx = (int)TempData["EditIndex"];
                 EditIndex = idx; 
                 NewClass = new ClassInformationModel
                 {
-                    ClassName = ClassesData[idx].ClassName,
-                    Description = ClassesData[idx].Description,
-                    StudentCount = ClassesData[idx].StudentCount
+                    ClassName = AllClasses[idx].ClassName,
+                    Description = AllClasses[idx].Description,
+                    StudentCount = AllClasses[idx].StudentCount
                 };
             }
         }
 
         public IActionResult OnPost()
         {
-            if (EditIndex >= 0 && EditIndex < ClassesData.Count)
+            if (EditIndex >= 0 && EditIndex < AllClasses.Count)
             {
-                ClassesData[EditIndex].ClassName = NewClass.ClassName;
-                ClassesData[EditIndex].Description = NewClass.Description;
-                ClassesData[EditIndex].StudentCount = NewClass.StudentCount;
+                AllClasses[EditIndex].ClassName = NewClass.ClassName;
+                AllClasses[EditIndex].Description = NewClass.Description;
+                AllClasses[EditIndex].StudentCount = NewClass.StudentCount;
             }
             else
             {
-                NewClass.Id = ClassesData.Count + 1;
-                ClassesData.Add(NewClass);
+                NewClass.Id = AllClasses.Count + 1;
+                AllClasses.Add(NewClass);
             }
 
             TempData.Remove("EditIndex"); 
-            return RedirectToPage();
+            return RedirectToPage(new { Filter, PageNumber });
         }
 
-        public IActionResult OnPostDelete()
+        public IActionResult OnPostDelete(int deleteId)
         {
-            if (DeleteIndex >= 0 && DeleteIndex < ClassesData.Count)
+            var item = AllClasses.FirstOrDefault(c => c.Id == deleteId);
+            if (item != null)
             {
-                ClassesData.RemoveAt(DeleteIndex);
+                AllClasses.Remove(item);
             }
-            return RedirectToPage();
+            return RedirectToPage(new { Filter, PageNumber });
         }
 
         public IActionResult OnPostEdit()
         {
+           
             TempData["EditIndex"] = EditIndex;
             return RedirectToPage();
+        
+        }
+
+        private static List<ClassInformationModel> GenerateSampleData()
+        {
+            var list = new List<ClassInformationModel>();
+            for (int i = 1; i <= 100; i++)
+            {
+                list.Add(new ClassInformationModel
+                {
+                    Id = i,
+                    ClassName = $"Class {i}",
+                    StudentCount = 20 + (i % 10),
+                    Description = $"This is a description for class {i}"
+                });
+            }
+            return list;
         }
     }
 }

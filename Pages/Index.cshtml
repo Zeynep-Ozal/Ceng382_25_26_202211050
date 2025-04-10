@@ -1,150 +1,250 @@
 ﻿@page
 @model RazorPage.Pages.IndexModel
-@{
-    ViewData["Title"] = "Class Manager";
-}
+@using RazorPage.Models
 
 <style>
-    <!-- koyu tema yap ve  şekillerin kenarları oval olsun-->
+    <!--koyu tema yap ve arayüzü güzelleştir-->
     body {
         background-color: #1e1e2f;
-        color: #ffffff;
+        color: #f0f0f0;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
     }
 
-    h2 {
-        color: #e0e0ff;
+    .container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 20px;
     }
 
-    input, button {
+    .form-section, .table-section {
+        background-color: #2a2a3c;
+        padding: 20px;
+        border-radius: 12px;
+        flex: 1;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    h3 {
+        border-bottom: 1px solid #444;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #ddd;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea {
         width: 100%;
         padding: 10px;
-        margin-top: 5px;
-        margin-bottom: 15px;
+        background-color: #1c1c2b;
+        color: #fff;
+        border: 1px solid #444;
         border-radius: 6px;
-        border: none;
-        box-sizing: border-box;
-        font-size: 14px;
-    }
-
-    input[type="text"], input[type="number"] {
-        background-color: #2e2e3e;
-        color: white;
     }
 
     button {
-        background-color: #6c63ff;
+        background-color: #4e8cff;
         color: white;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 6px;
         cursor: pointer;
         transition: background-color 0.3s ease;
     }
 
     button:hover {
-        background-color: #5a54e8;
+        background-color: #3a6edc;
+    }
+
+    .btn {
+        text-decoration: none;
+        color: white;
+        padding: 10px 16px;
+        border-radius: 6px;
+        background-color: #777;
+    }
+
+    .btn:hover {
+        background-color: #999;
     }
 
     table {
         width: 100%;
         border-collapse: collapse;
-        background-color: #2e2e3e;
-        color: white;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        margin-top: 20px;
     }
 
     th, td {
-        padding: 12px 15px;
-        text-align: center;
+        padding: 12px;
         border-bottom: 1px solid #444;
+        text-align: left;
     }
 
-   th {
-        background-color: #3f3f5a;
-        padding: 8px 10px;
-        font-size: 13px;
-        line-height: 1.2;
-        font-weight: 400;
-        border-bottom: 1px solid #555;
+    th {
+        background-color: #333;
     }
 
-    td form {
-        display: inline-block;
-        margin: 0 2px;
+    tr:hover {
+        background-color: #2f2f45;
     }
 
-    .container {
+    .delete-btn {
+        background-color: #e74c3c;
+    }
+
+    .delete-btn:hover {
+        background-color: #c0392b;
+    }
+
+    .action-buttons {
         display: flex;
-        justify-content: flex-start;
-        align-items: flex-start;
-        padding: 30px;
-        gap: 40px;
+        gap: 10px;
     }
 
-    .form-card, .table-card {
-        padding: 20px;
-        border-radius: 12px;
-        background-color: #29293d;
-        box-shadow: 0 0 15px rgba(0,0,0,0.6);
+    .filter-container {
+        margin-bottom: 15px;
     }
 
-    .form-card {
-        width: 30%;
-    }
-
-    .table-card {
+    .filter-container input[type="text"] {
         flex: 1;
-        max-width: 70%;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .page-info {
+        color: #ccc;
+    }
+
+    .page-numbers a {
+        margin: 0 4px;
+        padding: 6px 12px;
+        background-color: #333;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+    }
+
+    .page-numbers a:hover {
+        background-color: #555;
     }
 </style>
 
+
 <div class="container">
-    <!-- sol tarafa form koy -->
-    <div class="form-card">
-        <h2>Class Information</h2>
+    <!-- Left: Form -->
+    <div class="form-section">
+        <h3>@(Model.NewClass.Id == 0 ? "Add New Class" : $"Edit Class {Model.NewClass.Id}")</h3>
+
         <form method="post">
-            <input type="hidden" asp-for="EditIndex" />
-            <label>Class Name</label>
-            <input type="text" asp-for="NewClass.ClassName" required />
+            @if (Model.NewClass.Id != 0)
+            {
+                <input type="hidden" asp-for="NewClass.Id" />
+            }
 
-            <label>Description</label>
-            <input type="text" asp-for="NewClass.Description" required />
+            <div class="form-group">
+                <label>Class Name:</label>
+                <input asp-for="NewClass.ClassName" />
+                <span asp-validation-for="NewClass.ClassName" class="text-danger"></span>
+            </div>
 
-            <label>Student Count</label>
-            <input type="number" asp-for="NewClass.StudentCount" required />
+            <div class="form-group">
+                <label>Student Count:</label>
+                <input asp-for="NewClass.StudentCount" type="number" />
+                <span asp-validation-for="NewClass.StudentCount" class="text-danger"></span>
+            </div>
 
-            <button type="submit">@(Model.IsEditMode ? "Update" : "Add") Class</button>
+            <div class="form-group">
+                <label>Description:</label>
+                <textarea asp-for="NewClass.Description"></textarea>
+                <span asp-validation-for="NewClass.Description" class="text-danger"></span>
+            </div>
+
+            <button type="submit">@((Model.NewClass.Id == 0) ? "Add Class" : "Update Class")</button>
+
+            @if (Model.NewClass.Id != 0)
+            {
+                <a href="/" class="btn" style="margin-left: 10px; background-color: #bdc3c7;">Cancel</a>
+            }
         </form>
+
+        <partial name="_ValidationScriptsPartial" />
     </div>
 
-    <!-- Tsağ tarafa tablo koy class name description student count ve actions olsun -->
-    <div class="table-card">
-        <h2 style="text-align: center;">Class List</h2>
+    <!-- Right: Table -->
+    <div class="table-section">
+        <h3>Class List</h3>
+        <div class="filter-container">
+            <form method="get" style="display: flex; width: 100%; gap: 10px;">
+                <input type="text" name="Filter" value="@Model.Filter" placeholder="Filter by Class Name" />
+                <button type="submit">Filter</button>
+            </form>
+        </div>
+
         <table>
-            <tr>
-                <th>Class Name</th>
-                <th>Description</th>
-                <th>Student Count</th>
-                <th>Actions</th>
-            </tr>
-            @foreach (var c in Model.Classes)
-            {
+            <thead>
                 <tr>
-                    <td>@c.ClassName</td>
-                    <td>@c.Description</td>
-                    <td>@c.StudentCount</td>
-                    <td>
-                        <form method="post" asp-page-handler="Edit">
-                            <input type="hidden" name="EditIndex" value="@Model.Classes.IndexOf(c)" />
-                            <button type="submit">Edit</button>
-                        </form>
-                        <form method="post" asp-page-handler="Delete">
-                            <input type="hidden" name="DeleteIndex" value="@Model.Classes.IndexOf(c)" />
-                            <button type="submit">Delete</button>
-                        </form>
-                    </td>
+                    <th>Class Name</th>
+                    <th>Students</th>
+                    <th>Description</th>
+                    <th>Actions</th>
                 </tr>
-            }
+            </thead>
+            <tbody>
+                @foreach (var item in Model.FilteredClasses)
+                {
+                    <tr>
+                        <td>@item.ClassName</td>
+                        <td>@item.StudentCount</td>
+                        <td title="@item.Description">
+                            @(item.Description.Length > 50 ? item.Description.Substring(0, 50) + "..." : item.Description)
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <form method="post" asp-page-handler="Edit">
+                                    <input type="hidden" name="EditId" value="@item.Id" />
+                                    <button type="submit">Edit</button>
+                                </form>
+                                <form method="post" asp-page-handler="Delete">
+                                    <input type="hidden" name="DeleteId" value="@item.Id" />
+                                    <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this class?')">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
         </table>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="pagination">
+                <span class="page-info">Page @Model.PageNumber of @Model.TotalPages</span>
+                <div class="page-numbers">
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <a href="?PageNumber=@i&Filter=@Model.Filter">@i</a>
+                    }
+                </div>
+            </div>
+        }
     </div>
 </div>
