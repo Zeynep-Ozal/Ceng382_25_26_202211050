@@ -73,6 +73,38 @@ namespace RazorPage.Pages
             StudentCount = AllClasses[idx].StudentCount
         };
     }
+
+    // Authentication kontrolü
+    var sessionUsername = HttpContext.Session.GetString("username");
+    var sessionToken = HttpContext.Session.GetString("token");
+    var sessionId = HttpContext.Session.GetString("session_id");
+
+    var cookieUsername = Request.Cookies["username"];
+    var cookieToken = Request.Cookies["token"];
+    var cookieSessionId = Request.Cookies["session_id"];
+
+    bool isAuthenticated =
+        !string.IsNullOrEmpty(sessionUsername) &&
+        sessionUsername == cookieUsername &&
+        sessionToken == cookieToken &&
+        sessionId == cookieSessionId;
+
+    if (!isAuthenticated)
+    {
+        TempData["ErrorMessage"] = "You must log in to access this page.";
+        return RedirectToPage("/Login");
+    }
+
+    CurrentUser = sessionUsername;
+
+    cookieUsername = Request.Cookies["username"];
+    cookieToken = Request.Cookies["token"];
+    cookieSessionId = Request.Cookies["session_id"];
+
+    Console.WriteLine($"username: {cookieUsername}");
+    Console.WriteLine($"token: {cookieToken}");
+    Console.WriteLine($" session_id: {cookieSessionId}");
+
     return Page();
 }
 
