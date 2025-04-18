@@ -3,11 +3,18 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using RazorPage.Models;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Text.Json;   
+
 
 namespace RazorPage.Pages
 {
     public class IndexModel : PageModel
     {
+
+        public string? CurrentUser { get; set; }
+
         private static List<ClassInformationModel> AllClasses = GenerateSampleData();
 
         [BindProperty]
@@ -29,40 +36,46 @@ namespace RazorPage.Pages
 
         public bool IsEditMode => TempData["EditIndex"] != null;
 
-        public void OnGet()
+        [BindProperty]
+        public string? SelectedColumns { get; set; }
+
+
+      public IActionResult OnGet()
+{
+    var query = AllClasses.AsQueryable();
+
+    if (!string.IsNullOrEmpty(Filter))
+    {
+        query = query.Where(c => c.ClassName != null && c.ClassName.Contains(Filter, System.StringComparison.OrdinalIgnoreCase));
+    }
+
+    TotalPages = (int)Math.Ceiling(query.Count() / (double)PageSize);
+
+    FilteredClasses = query
+        .Skip((PageNumber - 1) * PageSize)
+        .Take(PageSize)
+        .Select(c => new ClassInformationTable
         {
-            var query = AllClasses.AsQueryable();
+            Id = c.Id,
+            ClassName = c.ClassName,
+            StudentCount = c.StudentCount,
+            Description = c.Description
+        }).ToList();
 
-            if (!string.IsNullOrEmpty(Filter))
-            {
-                query = query.Where(c => c.ClassName != null && c.ClassName.Contains(Filter, System.StringComparison.OrdinalIgnoreCase));
-            }
+    if (TempData["EditIndex"] != null)
+    {
+        int idx = (int)TempData["EditIndex"];
+        EditIndex = idx;
+        NewClass = new ClassInformationModel
+        {
+            ClassName = AllClasses[idx].ClassName,
+            Description = AllClasses[idx].Description,
+            StudentCount = AllClasses[idx].StudentCount
+        };
+    }
+    return Page();
+}
 
-            TotalPages = (int)System.Math.Ceiling(query.Count() / (double)PageSize);
-
-            FilteredClasses = query
-                .Skip((PageNumber - 1) * PageSize)
-                .Take(PageSize)
-                .Select(c => new ClassInformationTable
-                {
-                    Id = c.Id,
-                    ClassName = c.ClassName,
-                    StudentCount = c.StudentCount,
-                    Description = c.Description
-                }).ToList();
-
-            if (TempData["EditIndex"] != null)
-            {
-                int idx = (int)TempData["EditIndex"];
-                EditIndex = idx; 
-                NewClass = new ClassInformationModel
-                {
-                    ClassName = AllClasses[idx].ClassName,
-                    Description = AllClasses[idx].Description,
-                    StudentCount = AllClasses[idx].StudentCount
-                };
-            }
-        }
 
         public IActionResult OnPost()
         {
@@ -76,6 +89,7 @@ namespace RazorPage.Pages
             {
                 NewClass.Id = AllClasses.Count + 1;
                 AllClasses.Add(NewClass);
+                
             }
 
             TempData.Remove("EditIndex"); 
@@ -115,5 +129,63 @@ namespace RazorPage.Pages
             }
             return list;
         }
+
+        
+
+        public IActionResult OnPostExport()
+        {
+            try
+            {
+                var selectedCols = SelectedColumns?
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(c => c.Trim())
+                    .ToArray() ?? Array.Empty<string>();
+                if (selectedCols.Length == 0)
+                {
+                selectedCols = typeof(ClassInformationModel)
+                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Select(p => p.Name)
+                    .ToArray();
+                }
+                var filtered = AllClasses
+                    .Where(c => string.IsNullOrEmpty(Filter) || c.ClassName.Contains(Filter, StringComparison.OrdinalIgnoreCase))
+                    .Skip((PageNumber - 1) * PageSize)
+                    .Take(PageSize)
+                    .ToList();
+
+                var dataToExport = filtered.Select(item =>
+                {
+                    var filteredItem = new Dictionary<string, object>();
+
+                    foreach (var column in selectedCols)
+                    {
+                        var prop = item.GetType().GetProperty(column, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                        if (prop != null)
+                        {
+                            filteredItem[column] = prop.GetValue(item, null) ?? "";
+                        }
+                    }
+
+                    return filteredItem;
+                }).ToList();
+
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                };
+
+                var json = JsonSerializer.Serialize(dataToExport, options);
+                return File(Encoding.UTF8.GetBytes(json), "application/json", "classes_export.json");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Export failed: {ex.Message}";
+                return RedirectToPage();
+            }
+        }
+
     }
-}
+    }
+
+    

@@ -1,0 +1,33 @@
+[
+    {
+      "Username": "admin",
+      "Password": "admin123",
+      "Role": "Admin",
+      "IsActive": true
+    },
+    {
+      "Username": "john",
+      "Password": "password1",
+      "Role": "User",
+      "IsActive": true
+    },
+    {
+      "Username": "jane",
+      "Password": "123456",
+      "Role": "User",
+      "IsActive": false
+    },
+    {
+      "Username": "alice",
+      "Password": "alicepass",
+      "Role": "User",
+      "IsActive": true
+    },
+    {
+      "Username": "bob",
+      "Password": "bobsecure",
+      "Role": "Admin",
+      "IsActive": false
+    }
+  ]
+  

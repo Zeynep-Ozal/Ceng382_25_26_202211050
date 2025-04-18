@@ -3,7 +3,6 @@
 @using RazorPage.Models
 
 <style>
-    <!--koyu tema yap ve arayüzü güzelleştir-->
     body {
         background-color: #1e1e2f;
         color: #f0f0f0;
@@ -69,6 +68,11 @@
         background-color: #3a6edc;
     }
 
+    .selected-column {
+        background-color: #cde6ff !important;
+        color: #000;
+    }
+
     .btn {
         text-decoration: none;
         color: white;
@@ -95,6 +99,7 @@
 
     th {
         background-color: #333;
+        cursor: pointer;
     }
 
     tr:hover {
@@ -145,8 +150,21 @@
     .page-numbers a:hover {
         background-color: #555;
     }
-</style>
 
+    .export-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 10px;
+    }
+
+    #selectedColumnList {
+        list-style-type: none;
+        padding-left: 0;
+        margin-top: 10px;
+        color: #ccc;
+        font-size: 14px;
+    }
+</style>
 
 <div class="container">
     <!-- Left: Form -->
@@ -191,6 +209,7 @@
     <!-- Right: Table -->
     <div class="table-section">
         <h3>Class List</h3>
+
         <div class="filter-container">
             <form method="get" style="display: flex; width: 100%; gap: 10px;">
                 <input type="text" name="Filter" value="@Model.Filter" placeholder="Filter by Class Name" />
@@ -198,13 +217,21 @@
             </form>
         </div>
 
-        <table>
+        <div class="export-container">
+            <form method="post" asp-page-handler="Export" id="exportForm">
+                <input type="hidden" name="SelectedColumns" id="selectedColumnsInput" />
+                <input type="hidden" name="Filter" value="@Model.Filter" />
+                <input type="hidden" name="PageNumber" value="@Model.PageNumber" />
+                <button type="submit" onclick="prepareExport()">Export to JSON</button>
+            </form>
+        </div>
+
+        <table id="classTable">
             <thead>
                 <tr>
-                    <th>Class Name</th>
-                    <th>Students</th>
+                    <th>ClassName</th>
+                    <th>StudentCount</th>
                     <th>Description</th>
-                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -233,7 +260,8 @@
             </tbody>
         </table>
 
-        <!-- Pagination -->
+        <ul id="selectedColumnList"></ul>
+
         @if (Model.TotalPages > 1)
         {
             <div class="pagination">
@@ -248,3 +276,36 @@
         }
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const table = document.getElementById('classTable');
+        const headerCells = table.querySelectorAll('thead th');
+        const selectedColumnsInput = document.getElementById('selectedColumnsInput');
+        const selectedList = document.getElementById('selectedColumnList');
+        const selectedColumns = new Set();
+
+        headerCells.forEach(th => {
+            const columnName = th.textContent.trim();
+
+            th.addEventListener('click', () => {
+                if (selectedColumns.has(columnName)) {
+                    selectedColumns.delete(columnName);
+                    th.classList.remove('selected-column');
+                } else {
+                    selectedColumns.add(columnName);
+                    th.classList.add('selected-column');
+                }
+
+                selectedColumnsInput.value = Array.from(selectedColumns).join(',');
+
+                selectedList.innerHTML = '';
+                Array.from(selectedColumns).forEach(col => {
+                    const li = document.createElement('li');
+                    li.textContent = col;
+                    selectedList.appendChild(li);
+                });
+            });
+        });
+    });
+</script>
